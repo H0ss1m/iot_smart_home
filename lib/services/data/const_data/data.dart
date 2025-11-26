@@ -5,6 +5,7 @@ List livingroom = [
     'moisture': 70.0,
     'temperature': 25.0,
     'door': false,
+    'window': false,
   },
 ];
 

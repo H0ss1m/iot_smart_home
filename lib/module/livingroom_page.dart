@@ -30,13 +30,15 @@ class LivingroomPage extends StatelessWidget {
             _buildSection(
               title: 'Climate Control',
               children: [
-                Obx(() => _buildToggleItem(
-                      icon: acIcon,
-                      title: 'Air Conditioning',
-                      isOn: controller.livingroomAc.value,
-                      onChanged: (value) =>
-                          controller.setLivingroomAc(value ?? false),
-                    )),
+                Obx(
+                  () => _buildToggleItem(
+                    icon: acIcon,
+                    title: 'Air Conditioning',
+                    isOn: controller.livingroomAc.value,
+                    onChanged: (value) =>
+                        controller.setLivingroomAc(value ?? false),
+                  ),
+                ),
                 const SizedBox(height: 16),
                 Obx(() => _buildTemperatureSlider(controller)),
               ],
@@ -47,13 +49,15 @@ class LivingroomPage extends StatelessWidget {
             _buildSection(
               title: 'Lighting',
               children: [
-                Obx(() => _buildToggleItem(
-                      icon: lightIcon,
-                      title: 'Ceiling Light',
-                      isOn: controller.livingroomLight.value,
-                      onChanged: (value) =>
-                          controller.setLivingroomLight(value ?? false),
-                    )),
+                Obx(
+                  () => _buildToggleItem(
+                    icon: lightIcon,
+                    title: 'Ceiling Light',
+                    isOn: controller.livingroomLight.value,
+                    onChanged: (value) =>
+                        controller.setLivingroomLight(value ?? false),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 24),
@@ -62,20 +66,32 @@ class LivingroomPage extends StatelessWidget {
             _buildSection(
               title: 'Security',
               children: [
-                Obx(() => _buildStatusItem(
-                      icon: mainDoorIcon,
-                      title: 'Main Door',
-                      status: controller.livingroomDoor.value
-                          ? 'Open'
-                          : 'Closed',
-                      isWarning: controller.livingroomDoor.value,
-                    )),
-                const SizedBox(height: 16),
-                _buildStatusItem(
-                  icon: windowIcon,
-                  title: 'Window',
-                  status: 'Closed',
-                  isWarning: false,
+                Row(
+                  children: [
+                    Expanded(
+                      child: Obx(
+                        () => _buildStatusCard(
+                          icon: mainDoorIcon,
+                          title: 'Main Door',
+                          isOpen: controller.livingroomDoor.value,
+                          onToggle: (value) =>
+                              controller.setLivingroomDoor(value),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Obx(
+                        () => _buildStatusCard(
+                          icon: windowIcon,
+                          title: 'Window',
+                          isOpen: controller.livingroomWindow.value,
+                          onToggle: (value) =>
+                              controller.setLivingroomWindow(value),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -267,58 +283,102 @@ class LivingroomPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusItem({
+  Widget _buildStatusCard({
     required IconData icon,
     required String title,
-    required String status,
-    required bool isWarning,
+    required bool isOpen,
+    required ValueChanged<bool> onToggle,
   }) {
-    final Color statusColor = isWarning
+    final Color statusColor = isOpen
         ? const Color(0xFFEF4444) // Red for warning
         : const Color(0xFF22C55E); // Green for safe
+    final String statusText = isOpen ? 'Open' : 'Closed';
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: bacContentContainers,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(icon, color: statusColor, size: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: statusColor, size: 26),
+              ),
+              _buildCustomSwitch(
+                value: isOpen,
+                onChanged: onToggle,
+                activeColor: statusColor,
+              ),
+            ],
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  status,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: statusColor,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-              ],
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            statusText,
+            style: TextStyle(
+              fontSize: 15,
+              color: statusColor,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCustomSwitch({
+    required bool value,
+    required ValueChanged<bool> onChanged,
+    Color? activeColor,
+  }) {
+    final Color switchActiveColor = activeColor ?? const Color(0xFF3B82F6);
+    final Color inactiveColor = Colors.grey.shade700;
+
+    return GestureDetector(
+      onTap: () => onChanged(!value),
+      child: Container(
+        width: 52,
+        height: 30,
+        decoration: BoxDecoration(
+          color: value ? switchActiveColor : inactiveColor,
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Stack(
+          children: [
+            AnimatedPositioned(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeInOut,
+              left: value ? 24 : 2,
+              top: 2,
+              child: Container(
+                width: 26,
+                height: 26,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

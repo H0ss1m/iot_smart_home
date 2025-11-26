@@ -24,6 +24,7 @@ class HomeController extends GetxController {
   final RxDouble livingroomMoisture = 70.0.obs;
   final RxDouble livingroomTemperature = 25.0.obs;
   final RxBool livingroomDoor = false.obs;
+  final RxBool livingroomWindow = false.obs;
 
   // Kitchen state
   final RxBool kitchenLight = true.obs;
@@ -89,6 +90,7 @@ class HomeController extends GetxController {
         livingroomTemperature.value =
             (livingroomData['temperature'] as num?)?.toDouble() ?? 25.0;
         livingroomDoor.value = livingroomData['door'] as bool? ?? false;
+        livingroomWindow.value = livingroomData['window'] as bool? ?? false;
       } else {
         // Document doesn't exist, use local data
         throw Exception('Livingroom document not found');
@@ -144,6 +146,7 @@ class HomeController extends GetxController {
     livingroomMoisture.value = livingroom[0]['moisture'] as double;
     livingroomTemperature.value = livingroom[0]['temperature'] as double;
     livingroomDoor.value = livingroom[0]['door'] as bool;
+    livingroomWindow.value = livingroom[0]['window'] as bool;
 
     // Load kitchen data
     kitchenLight.value = kitchen[0]['light'] as bool;
@@ -172,6 +175,7 @@ class HomeController extends GetxController {
     livingroom[0]['moisture'] = livingroomMoisture.value;
     livingroom[0]['temperature'] = livingroomTemperature.value;
     livingroom[0]['door'] = livingroomDoor.value;
+    livingroom[0]['window'] = livingroomWindow.value;
 
     // Sync kitchen
     kitchen[0]['light'] = kitchenLight.value;
@@ -202,6 +206,7 @@ class HomeController extends GetxController {
         'moisture': livingroomMoisture.value,
         'temperature': livingroomTemperature.value,
         'door': livingroomDoor.value,
+        'window': livingroomWindow.value,
       });
 
       // Initialize kitchen
@@ -289,6 +294,7 @@ class HomeController extends GetxController {
         (data['temperature'] as num?)?.toDouble() ??
         livingroomTemperature.value;
     livingroomDoor.value = data['door'] as bool? ?? livingroomDoor.value;
+    livingroomWindow.value = data['window'] as bool? ?? livingroomWindow.value;
 
     // Sync to data.dart for offline fallback
     _syncToLocalData();
@@ -365,6 +371,16 @@ class HomeController extends GetxController {
     livingroomDoor.value = value;
     if (_isFirebaseInitialized) {
       _firebaseService.updateRoomField('livingroom', 'door', value);
+    }
+    _syncToLocalData();
+    _updateAlarm();
+  }
+
+  void setLivingroomWindow(bool value) {
+    if (_isUpdatingFromFirebase) return;
+    livingroomWindow.value = value;
+    if (_isFirebaseInitialized) {
+      _firebaseService.updateRoomField('livingroom', 'window', value);
     }
     _syncToLocalData();
     _updateAlarm();
@@ -487,7 +503,8 @@ class HomeController extends GetxController {
   // Alarm methods
   void _updateAlarm() {
     // Check if any window or door is open
-    bool hasOpenWindow = kitchenWindow.value || bedroomWindow.value;
+    bool hasOpenWindow =
+        kitchenWindow.value || bedroomWindow.value || livingroomWindow.value;
     bool hasOpenDoor =
         kitchenDoor.value || livingroomDoor.value || bedroomDoor.value;
     alarmActive.value = hasOpenWindow || hasOpenDoor;
@@ -500,7 +517,8 @@ class HomeController extends GetxController {
         bedroomWindow.value ||
         kitchenDoor.value ||
         livingroomDoor.value ||
-        bedroomDoor.value;
+        bedroomDoor.value ||
+        livingroomWindow.value;
   }
 
   String get alarmMessage {
@@ -509,6 +527,7 @@ class HomeController extends GetxController {
 
     if (kitchenWindow.value) openWindows++;
     if (bedroomWindow.value) openWindows++;
+    if (livingroomWindow.value) openWindows++;
     if (kitchenDoor.value) openDoors++;
     if (livingroomDoor.value) openDoors++;
     if (bedroomDoor.value) openDoors++;
