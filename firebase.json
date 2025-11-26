@@ -1,0 +1,23 @@
+{
+    "flutter": {
+        "platforms": {
+            "android": {
+                "default": {
+                    "projectId": "iot-smart-system-a4490",
+                    "appId": "1:180298288626:android:e2babab6656841a9522f6b",
+                    "fileOutput": "android/app/google-services.json"
+                }
+            },
+            "dart": {
+                "lib/firebase_options.dart": {
+                    "projectId": "iot-smart-system-a4490",
+                    "configurations": {
+                        "android": "1:180298288626:android:e2babab6656841a9522f6b",
+                        "ios": "1:180298288626:ios:8c2e87f584fa474e522f6b",
+                        "web": "1:180298288626:web:63d3c32441241718522f6b"
+                    }
+                }
+            }
+        }
+    }
+}

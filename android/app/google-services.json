@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "180298288626",
+    "project_id": "iot-smart-system-a4490",
+    "storage_bucket": "iot-smart-system-a4490.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:180298288626:android:e2babab6656841a9522f6b",
+        "android_client_info": {
+          "package_name": "com.smart.iot.home.iot_smart_home"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCz10svRnzZJZKVpMrEzm7LiCQMuEcXIkA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
