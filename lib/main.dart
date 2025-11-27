@@ -8,6 +8,7 @@ import 'package:iot_smart_home/module/ketchin_page.dart';
 import 'package:iot_smart_home/module/livingroom_page.dart';
 import 'package:iot_smart_home/services/data/state_management/home_controller.dart';
 import 'package:iot_smart_home/view/home.dart';
+import 'package:iot_smart_home/view/splash.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,14 +53,15 @@ class MyApp extends StatelessWidget {
           titleSmall: TextStyle(color: const Color(0xffffffff)),
         ),
       ),
-      initialRoute: '/',
-      home: Home(),
+      initialRoute: '/splash',
+      home: const Splash(),
       getPages: [
-        GetPage(name: '/', page: () => Home()),
+        GetPage(name: '/', page: () => const Home()),
         GetPage(name: '/livingroom', page: () => LivingroomPage()),
         GetPage(name: '/home2', page: () => HomePage2()),
         GetPage(name: '/kitchen', page: () => KitchenPage()),
         GetPage(name: '/bedroom', page: () => BedroomPage()),
+        GetPage(name: '/splash', page: () => const Splash()),
       ],
     );
   }
