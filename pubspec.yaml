@@ -35,10 +35,8 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   get: ^4.7.2
-  firebase_core: ^4.2.1
-  firebase_dart: ^1.5.3
-  firebase_rules: ^0.2.1
-  cloud_firestore: ^6.1.0
+  firebase_core: ^2.27.0
+  firebase_database: ^10.4.0
   roundcheckbox: ^2.0.5
   icons_launcher: ^3.0.3
   lottie: ^3.3.2

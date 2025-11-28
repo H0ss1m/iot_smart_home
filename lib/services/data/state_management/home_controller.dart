@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:get/get.dart';
 import 'package:iot_smart_home/services/data/const_data/data.dart';
 import 'package:iot_smart_home/services/firebase/firebase_service.dart';
@@ -14,9 +14,9 @@ class HomeController extends GetxController {
   bool _isFirebaseInitialized = false;
 
   // Stream subscriptions
-  StreamSubscription<DocumentSnapshot>? _livingroomSubscription;
-  StreamSubscription<DocumentSnapshot>? _kitchenSubscription;
-  StreamSubscription<DocumentSnapshot>? _bedroomSubscription;
+  StreamSubscription<DatabaseEvent>? _livingroomSubscription;
+  StreamSubscription<DatabaseEvent>? _kitchenSubscription;
+  StreamSubscription<DatabaseEvent>? _bedroomSubscription;
 
   // Livingroom state
   final RxBool livingroomLight = false.obs;
@@ -92,8 +92,8 @@ class HomeController extends GetxController {
         livingroomDoor.value = livingroomData['door'] as bool? ?? false;
         livingroomWindow.value = livingroomData['window'] as bool? ?? false;
       } else {
-        // Document doesn't exist, use local data
-        throw Exception('Livingroom document not found');
+        // Node doesn't exist, use local data
+        throw Exception('Livingroom node not found');
       }
 
       // Load kitchen data from Firebase
@@ -107,7 +107,7 @@ class HomeController extends GetxController {
             (kitchenData['temperature'] as num?)?.toDouble() ?? 25.0;
         kitchenWindow.value = kitchenData['window'] as bool? ?? true;
       } else {
-        throw Exception('Kitchen document not found');
+        throw Exception('Kitchen node not found');
       }
 
       // Load bedroom data from Firebase
@@ -122,7 +122,7 @@ class HomeController extends GetxController {
         bedroomTemperature.value =
             (bedroomData['temperature'] as num?)?.toDouble() ?? 25.0;
       } else {
-        throw Exception('Bedroom document not found');
+        throw Exception('Bedroom node not found');
       }
 
       // Update alarm state
@@ -241,9 +241,11 @@ class HomeController extends GetxController {
     _livingroomSubscription = _firebaseService
         .getRoomStream('livingroom')
         .listen(
-          (snapshot) {
-            if (snapshot.exists && !_isUpdatingFromFirebase) {
-              final data = snapshot.data() as Map<String, dynamic>;
+          (event) {
+            if (event.snapshot.exists && !_isUpdatingFromFirebase) {
+              final data = Map<String, dynamic>.from(
+                event.snapshot.value as Map,
+              );
               _updateLivingroomFromFirebase(data);
             }
           },
@@ -256,9 +258,11 @@ class HomeController extends GetxController {
     _kitchenSubscription = _firebaseService
         .getRoomStream('kitchen')
         .listen(
-          (snapshot) {
-            if (snapshot.exists && !_isUpdatingFromFirebase) {
-              final data = snapshot.data() as Map<String, dynamic>;
+          (event) {
+            if (event.snapshot.exists && !_isUpdatingFromFirebase) {
+              final data = Map<String, dynamic>.from(
+                event.snapshot.value as Map,
+              );
               _updateKitchenFromFirebase(data);
             }
           },
@@ -271,9 +275,11 @@ class HomeController extends GetxController {
     _bedroomSubscription = _firebaseService
         .getRoomStream('bedroom')
         .listen(
-          (snapshot) {
-            if (snapshot.exists && !_isUpdatingFromFirebase) {
-              final data = snapshot.data() as Map<String, dynamic>;
+          (event) {
+            if (event.snapshot.exists && !_isUpdatingFromFirebase) {
+              final data = Map<String, dynamic>.from(
+                event.snapshot.value as Map,
+              );
               _updateBedroomFromFirebase(data);
             }
           },

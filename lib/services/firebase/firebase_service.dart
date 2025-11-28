@@ -1,19 +1,19 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_database/firebase_database.dart';
 
 class FirebaseService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseDatabase _database = FirebaseDatabase.instance;
 
-  // Reference to your home data collection
-  CollectionReference get homeDataRef => _firestore.collection('home_data');
+  // Reference to your home data node
+  DatabaseReference get homeDataRef => _database.ref('home_data');
 
-  // Get document reference for a specific room
-  DocumentReference roomRef(String roomName) {
-    return homeDataRef.doc(roomName);
+  // Get reference for a specific room
+  DatabaseReference roomRef(String roomName) {
+    return homeDataRef.child(roomName);
   }
 
   // Stream for real-time updates
-  Stream<DocumentSnapshot> getRoomStream(String roomName) {
-    return roomRef(roomName).snapshots();
+  Stream<DatabaseEvent> getRoomStream(String roomName) {
+    return roomRef(roomName).onValue;
   }
 
   // Update a specific field in a room (only updates existing documents)
@@ -23,17 +23,16 @@ class FirebaseService {
     dynamic value,
   ) async {
     try {
-      // Check if document exists first
-      final doc = await roomRef(roomName).get();
-      if (doc.exists) {
-        // Document exists, update it
+      // Check if data exists first
+      final snapshot = await roomRef(roomName).get();
+      if (snapshot.exists) {
+        // Data exists, update it
         await roomRef(roomName).update({field: value});
       } else {
-        // Document doesn't exist, this shouldn't happen if initialization worked
-        // But if it does, we'll create it with the field (shouldn't reach here normally)
-        print('Warning: Document $roomName does not exist. Please initialize it first.');
-        // Optionally, you can throw an error instead:
-        // throw Exception('Document $roomName does not exist. Initialize it first.');
+        // Data doesn't exist
+        print(
+          'Warning: Node $roomName does not exist. Please initialize it first.',
+        );
       }
     } catch (e) {
       print('Error updating $roomName.$field: $e');
@@ -42,11 +41,8 @@ class FirebaseService {
   }
 
   // Update entire room data
-  Future<void> updateRoom(
-    String roomName,
-    Map<String, dynamic> data,
-  ) async {
-    await roomRef(roomName).set(data, SetOptions(merge: true));
+  Future<void> updateRoom(String roomName, Map<String, dynamic> data) async {
+    await roomRef(roomName).update(data);
   }
 
   // Initialize room data if it doesn't exist
@@ -54,8 +50,8 @@ class FirebaseService {
     String roomName,
     Map<String, dynamic> defaultData,
   ) async {
-    final doc = await roomRef(roomName).get();
-    if (!doc.exists) {
+    final snapshot = await roomRef(roomName).get();
+    if (!snapshot.exists) {
       await roomRef(roomName).set(defaultData);
     }
   }
@@ -63,9 +59,9 @@ class FirebaseService {
   // Get room data from Firebase
   Future<Map<String, dynamic>?> getRoomData(String roomName) async {
     try {
-      final doc = await roomRef(roomName).get();
-      if (doc.exists) {
-        return doc.data() as Map<String, dynamic>;
+      final snapshot = await roomRef(roomName).get();
+      if (snapshot.exists) {
+        return Map<String, dynamic>.from(snapshot.value as Map);
       }
       return null;
     } catch (e) {
@@ -74,4 +70,3 @@ class FirebaseService {
     }
   }
 }
-
